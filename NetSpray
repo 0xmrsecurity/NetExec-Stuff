@@ -3,7 +3,7 @@
 #            NetExec Password/Hash Spraying Automation Tool                   
 # Author: 0xmr
 # Purpose: Spray credentials across multiple protocols and targets
-# Usage: ./NetSpray <protocols|all> <targets> -u <user> [-p pass | -H hash]
+# Usage:  NetSpray <protocols|all> <targets> -u <user> [-p pass | -H hash]
 
 # HELP & USAGE
 show_usage() {
