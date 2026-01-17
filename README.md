@@ -15,7 +15,7 @@ sudo chmod +x /usr/local/bin/NetSpray
 ### Help Menu !
 ```bash
 └─# NetSpray -h                                                                                             
-Usage: /usr/local/bin/NetSpray <protocols|all> <targets> -u <username> [-p <password> | -H <hash>] [OPTIONS]
+Usage: NetSpray <protocols|all> <targets> -u <username> [-p <password> | -H <hash>] [OPTIONS]
 
 Required:
   protocols          Protocols to test: smb,ldap,winrm,rdp,mssql,ssh or 'all'
