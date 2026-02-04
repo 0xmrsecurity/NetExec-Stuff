@@ -50,3 +50,6 @@ winrm
 ssh
 mssql
 ```
+# Proof
+
+<img width="1199" height="512" alt="image" src="https://github.com/0xmrsecurity/NetExec-Stuff/blob/main/NetSpray.png" />
