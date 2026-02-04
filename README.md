@@ -1,6 +1,8 @@
 # NetSpray  
 NetSpray is a wrapper script designed to save time when performing password or hash spraying across multiple protocols. It leverages the power of [NetExec](https://www.netexec.wiki/) to automate the process efficiently.
 
+<img width="1199" height="512" alt="image" src="https://github.com/0xmrsecurity/NetExec-Stuff/blob/main/NetSpray.png" />
+
 ## Installation
 ### Clone it
 ```bash
