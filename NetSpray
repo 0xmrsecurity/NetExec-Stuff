@@ -167,9 +167,9 @@ for PROTOCOL in "${PROTOCOL_LIST[@]}"; do
         echo "  → Target: $TARGET"
         # Run NetExec command directly (it handles its own timeout and output)
         if [ -n "$HASH" ]; then
-            NetExec "$PROTOCOL" "$TARGET" -u "$USERNAME" -H "$HASH" $CONTINUE_FLAG $NOBRUTE_FLAG
+            nxc "$PROTOCOL" "$TARGET" -u "$USERNAME" -H "$HASH" $CONTINUE_FLAG $NOBRUTE_FLAG
         else
-            NetExec "$PROTOCOL" "$TARGET" -u "$USERNAME" -p "$PASSWORD" $CONTINUE_FLAG $NOBRUTE_FLAG
+            nxc "$PROTOCOL" "$TARGET" -u "$USERNAME" -p "$PASSWORD" $CONTINUE_FLAG $NOBRUTE_FLAG
         fi
         
         echo ""
