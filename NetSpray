@@ -10,7 +10,7 @@ show_usage() {
     echo "Usage: $0 <protocols|all> <targets> -u <username> [-p <password> | -H <hash>] [OPTIONS]"
     echo ""
     echo "Required:"
-    echo "  protocols          Protocols to test: smb,ldap,winrm,rdp,mssql,ssh or 'all'"
+    echo "  protocols          Protocols to test: smb,ldap,winrm,rdp,mssql,ssh,ftp,nfs,vnc,wmi or 'all'"
     echo "  targets            IP address, IP range, or file with targets (one per line)"
     echo "  -u USERNAME        Username to spray"
     echo ""
@@ -117,9 +117,9 @@ fi
 #-------- PROTOCOL SETUP
 
 # Handle 'all' protocols or parse comma-separated list
-# Order: smb → winrm → rdp → mssql → ssh → ldap
+# Order: smb → winrm → rdp → mssql → ssh → ldap → ftp → nfs → vnc → wmi
 if [ "$PROTOCOLS_INPUT" = "all" ]; then
-    PROTOCOL_LIST=(smb winrm rdp mssql ssh ldap)
+    PROTOCOL_LIST=(smb winrm rdp mssql ssh ldap ftp nfs vnc wmi)
 else
     IFS=',' read -ra PROTOCOL_LIST <<< "$PROTOCOLS_INPUT"
 fi
