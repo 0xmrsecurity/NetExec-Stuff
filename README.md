@@ -20,7 +20,7 @@ sudo chmod +x /usr/local/bin/NetSpray
 Usage: NetSpray <protocols|all> <targets> -u <username> [-p <password> | -H <hash>] [OPTIONS]
 
 Required:
-  protocols          Protocols to test: smb,ldap,winrm,rdp,mssql,ssh or 'all'
+  protocols          Protocols to test: smb,ldap,winrm,rdp,mssql,ssh,ftp,nfs,vnc,wmi or 'all'
   targets            IP address, IP range, or file with targets (one per line)
   -u USERNAME        Username to spray
 
@@ -47,10 +47,15 @@ NetSpray smb,winrm,rdp,ldap,ssh,mssql target -u '' -p ''
 
 # Available Protocals
 smb
-ldap
 winrm
-ssh
+rdp
 mssql
+ssh
+ldap
+ftp
+nfs
+vnc
+wmi
 ```
 # Proof
 
